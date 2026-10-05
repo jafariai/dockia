@@ -1,0 +1,125 @@
+# Distinct project name so containers/volumes/networks are namespaced
+# (dockia_*) and never collide with other stacks on the same host.
+name: dockia
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-dockia}
+      POSTGRES_USER: ${POSTGRES_USER:-dockia}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-dockia}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    # Not exposed to host: DB is reachable only on the internal network.
+    networks:
+      - backend
+
+  # Channel layer for realtime websockets + web-push subscriptions (not
+  # host-exposed). Persisted (appendonly) so the VAPID keypair + push
+  # subscriptions survive restarts.
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redisdata:/data
+    networks:
+      - backend
+
+  backend:
+    build:
+      context: ./backend
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      # Stream file downloads through nginx instead of a Django worker.
+      USE_X_ACCEL_REDIRECT: "1"
+      # Lets the HTTP workers publish activity events to the websocket process.
+      REDIS_URL: redis://redis:6379/0
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    volumes:
+      - media:/app/media
+      - static:/app/staticfiles
+    expose:
+      - "8000"
+    networks:
+      - backend
+      - frontend
+
+  # Daphne (ASGI) serving websockets only — nginx routes /ws here, so the
+  # gunicorn HTTP path stays independent of the websocket process.
+  ws:
+    build:
+      context: ./backend
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      REDIS_URL: redis://redis:6379/0
+    entrypoint: ["daphne", "-b", "0.0.0.0", "-p", "8001", "config.asgi:application"]
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    expose:
+      - "8001"
+    networks:
+      - backend
+      - frontend
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-/api}
+    restart: unless-stopped
+    env_file: .env
+    depends_on:
+      - backend
+    expose:
+      - "3000"
+    networks:
+      - frontend
+
+  nginx:
+    image: nginx:1.27-alpine
+    restart: unless-stopped
+    depends_on:
+      - backend
+      - frontend
+      - ws
+    ports:
+      # HTTPS only (self-signed TLS terminated in this nginx). Pick any free
+      # host port; optionally lock it to an IP allowlist with
+      # scripts/restrict-port.sh.
+      - "${HTTPS_PORT:-8443}:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/proxy_params_internal:/etc/nginx/proxy_params_internal:ro
+      - ./nginx/certs:/etc/nginx/certs:ro
+      - media:/var/www/media:ro
+      - static:/var/www/static:ro
+    networks:
+      - frontend
+
+volumes:
+  pgdata:
+  media:
+  static:
+  redisdata:
+
+networks:
+  backend:
+    internal: true
+  frontend:

@@ -1,0 +1,31 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+# Django
+media/
+staticfiles/
+*.sqlite3
+# Env — keep only the committed example; ignore real/secret env files
+.env
+.env.*
+!.env.example
+*.local
+# Backups (contain a full DB + media dump)
+backups/
+# TLS material — never commit private keys
+nginx/certs/
+# MCP config — contains a live API token
+.mcp.json
+# Node
+node_modules/
+.next/
+out/
+npm-debug.log*
+*.tsbuildinfo
+# Misc
+.DS_Store
+.idea/
+.vscode/
