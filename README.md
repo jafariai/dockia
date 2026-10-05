@@ -2,6 +2,9 @@
 
 **A self-hosted home for the HTML documents your team generates.**
 
+<img width="2560" height="1280" alt="GitHub social preview · 1280×640@2x" src="https://github.com/user-attachments/assets/20c3a654-6e53-4bbd-8733-a5343ab47aab" />
+
+
 [![CI](https://github.com/jafariai/dockia/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/jafariai/dockia/actions/workflows/ci-cd.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
