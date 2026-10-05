@@ -102,7 +102,7 @@ runs with the permissions of the token's owner, project scoping included.
 2. Install the dependencies (Python 3.10+):
    ```bash
    cd mcp-server
-   python -m venv .venv && source .venv/bin/activate   # Windows: .venv\Scriptsctivate
+   python -m venv .venv && source .venv/bin/activate   # Windows: .venv\Scripts\activate
    pip install -r requirements.txt
    ```
 3. Register the server with your MCP client:
