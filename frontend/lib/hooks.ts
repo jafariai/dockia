@@ -25,7 +25,6 @@ import type {
   User,
 } from "./types";
 
-// --- Dashboard -------------------------------------------------------------
 export function useDashboard() {
   return useQuery({
     queryKey: ["dashboard"],
@@ -33,7 +32,6 @@ export function useDashboard() {
   });
 }
 
-// --- Activity / notifications (client-side, polls existing endpoints) ------
 const RECENT_PARAMS = { ordering: "-created_at", page_size: 20 };
 
 export function useRecentDocuments() {
@@ -86,7 +84,6 @@ export function useNewCounts() {
   };
 }
 
-// --- Documents -------------------------------------------------------------
 export interface DocumentFilters {
   search?: string;
   owner?: number;
@@ -206,7 +203,6 @@ export function useReplaceDocumentFile() {
   });
 }
 
-// --- Prompts (shared instructions) -----------------------------------------
 export interface PromptFilters {
   search?: string;
   project?: number;
@@ -264,7 +260,6 @@ export function useDeletePrompt() {
   });
 }
 
-// --- Files (backups / assets) ----------------------------------------------
 export interface FileFilters {
   search?: string;
   project?: number;
@@ -301,7 +296,6 @@ export function useDeleteFile() {
   });
 }
 
-// --- Projects --------------------------------------------------------------
 export function useProjects() {
   return useQuery({
     queryKey: ["projects"],
@@ -372,7 +366,6 @@ export function useAssignMembers() {
   });
 }
 
-// --- Project links (Figma / Linear / repo / …) -----------------------------
 export function useProjectLinks(projectId?: number) {
   return useQuery({
     queryKey: ["project-links", projectId],
@@ -413,7 +406,6 @@ export function useDeleteProjectLink() {
   });
 }
 
-// --- Categories ------------------------------------------------------------
 export function useCategories() {
   return useQuery({
     queryKey: ["categories"],
@@ -455,7 +447,6 @@ export function useDeleteCategory() {
   });
 }
 
-// --- Users (admin) ---------------------------------------------------------
 export function useUsers(enabled = true) {
   return useQuery({
     enabled,
@@ -491,7 +482,6 @@ export function useResetPassword() {
   });
 }
 
-// --- API tokens (service credentials for the MCP server) -------------------
 export function useApiTokens() {
   return useQuery({
     queryKey: ["api-tokens"],
@@ -516,7 +506,6 @@ export function useRevokeApiToken() {
   });
 }
 
-// --- Audit logs (admin) ----------------------------------------------------
 export function useLogs(filters: { action?: string; search?: string; page?: number }) {
   const params = Object.fromEntries(
     Object.entries(filters).filter(([, v]) => v !== undefined && v !== "")

@@ -17,16 +17,13 @@ class DocumentFilter(filters.FilterSet):
     project = filters.NumberFilter(field_name="project_id")
     tag = filters.CharFilter(method="filter_tag")
 
-    # Quick presets used by the date dropdown.
     date = filters.ChoiceFilter(
         method="filter_date_preset",
         choices=[("today", "Today"), ("7d", "Last 7 days"), ("30d", "Last 30 days")],
     )
-    # Custom range.
     created_after = filters.DateFilter(field_name="created_at", lookup_expr="gte")
     created_before = filters.DateFilter(field_name="created_at", lookup_expr="lte")
 
-    # Free-text search across title / description / tags.
     search = filters.CharFilter(method="filter_search")
 
     class Meta:

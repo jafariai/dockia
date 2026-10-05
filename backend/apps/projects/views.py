@@ -46,7 +46,6 @@ class ProjectViewSet(viewsets.ModelViewSet):
                    {"name": project.name})
 
     def perform_destroy(self, instance):
-        # Cascades to the project's documents, files, prompts, links, members.
         project_id, name = instance.id, instance.name
         instance.delete()
         log_action(self.request, "delete_project", "project", project_id,

@@ -159,7 +159,6 @@ export function UploadDialog() {
               file={file}
               onFile={(f) => {
                 setFile(f);
-                // Prefill the title from the filename if still empty.
                 if (f && !title) setTitle(f.name.replace(/\.html?$/i, ""));
               }}
               accept=".html,.htm,text/html"

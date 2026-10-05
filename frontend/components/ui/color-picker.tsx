@@ -32,7 +32,6 @@ export function ColorPicker({
           style={{ backgroundColor: c }}
         />
       ))}
-      {/* Custom color */}
       <label className="ml-1 inline-flex h-7 cursor-pointer items-center gap-1.5 rounded-md border border-border px-2 text-xs text-muted-foreground">
         <span
           className="h-4 w-4 rounded-full border border-border"

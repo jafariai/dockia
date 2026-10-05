@@ -18,12 +18,10 @@ export function MobileNav() {
   const [open, setOpen] = useState(false);
   const totalNew = counts.documents + counts.files;
 
-  // Close on route change.
   useEffect(() => {
     setOpen(false);
   }, [pathname]);
 
-  // Close on Escape; lock body scroll while open.
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);

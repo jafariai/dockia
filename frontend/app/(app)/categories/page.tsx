@@ -164,7 +164,6 @@ function CategoriesInner() {
         </form>
       </Dialog>
 
-      {/* Color dialog */}
       <Dialog
         open={!!colorFor}
         onClose={() => setColorFor(null)}

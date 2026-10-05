@@ -10,7 +10,6 @@ hex_color_validator = RegexValidator(
 class Category(models.Model):
     name = models.CharField(max_length=80, unique=True)
     slug = models.SlugField(max_length=100, unique=True, blank=True)
-    # Display color used in dashboard charts and labels.
     color = models.CharField(
         max_length=7, default="#10b981", validators=[hex_color_validator]
     )

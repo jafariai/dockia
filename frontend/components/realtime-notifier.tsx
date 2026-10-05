@@ -15,11 +15,9 @@ function wsUrl(token: string): string {
   const base = process.env.NEXT_PUBLIC_API_URL || "/api";
   let origin: string;
   if (base.startsWith("http")) {
-    // absolute (local dev: http://localhost:8000/api) → ws://localhost:8000
     const u = new URL(base);
     origin = `${u.protocol === "https:" ? "wss:" : "ws:"}//${u.host}`;
   } else {
-    // same-origin ("/api"): derive from the page
     const proto = window.location.protocol === "https:" ? "wss:" : "ws:";
     origin = `${proto}//${window.location.host}`;
   }
@@ -39,11 +37,9 @@ export function RealtimeNotifier() {
   const setConnected = useSocketStore((s) => s.setConnected);
   const qc = useQueryClient();
 
-  // Keep badge data fresh (and as a fallback if the socket drops).
   useRecentDocuments();
   useRecentFiles();
 
-  // Latest values without re-opening the socket on every change.
   const enabledRef = useRef(enabled);
   enabledRef.current = enabled;
   const userIdRef = useRef(userId);
@@ -93,7 +89,6 @@ export function RealtimeNotifier() {
         });
         return;
       }
-      // Too many at once — collapse into a single summary.
       const docs = items.filter((i) => i.label === "document").length;
       const files = items.filter((i) => i.label === "file").length;
       const parts: string[] = [];

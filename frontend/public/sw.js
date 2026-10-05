@@ -11,7 +11,6 @@ self.addEventListener("install", (event) => {
   );
 });
 
-// --- Web Push: show a notification even when the tab is closed --------------
 self.addEventListener("push", (event) => {
   let data = {};
   try {

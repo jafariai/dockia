@@ -176,7 +176,6 @@ function UsersInner() {
         </div>
       )}
 
-      {/* Create user */}
       <Dialog open={createOpen} onClose={() => setCreateOpen(false)} title="New user">
         <form onSubmit={onCreate} className="space-y-4">
           <div className="grid grid-cols-2 gap-3">
@@ -235,7 +234,6 @@ function UsersInner() {
         </form>
       </Dialog>
 
-      {/* Project access */}
       <Dialog
         open={!!permFor}
         onClose={() => setPermFor(null)}
@@ -271,7 +269,6 @@ function UsersInner() {
         </div>
       </Dialog>
 
-      {/* Reset password */}
       <Dialog
         open={!!resetFor}
         onClose={() => setResetFor(null)}

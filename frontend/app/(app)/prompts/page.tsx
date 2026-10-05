@@ -51,7 +51,6 @@ export default function PromptsPage() {
         action={newButton}
       />
 
-      {/* Filter bar */}
       <div className="grid gap-3 rounded-xl border border-border bg-card/40 p-3 md:grid-cols-2 lg:grid-cols-4">
         <form
           className="relative lg:col-span-2"
@@ -98,7 +97,6 @@ export default function PromptsPage() {
         </Select>
       </div>
 
-      {/* Results */}
       {isLoading ? (
         <div className="space-y-2">
           {Array.from({ length: 6 }).map((_, i) => (

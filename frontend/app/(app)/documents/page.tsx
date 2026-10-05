@@ -58,7 +58,6 @@ export default function DocumentsPage() {
         action={canUpload ? <UploadDialog /> : undefined}
       />
 
-      {/* Filter bar */}
       <div className="grid gap-3 rounded-xl border border-border bg-card/40 p-3 md:grid-cols-2 lg:grid-cols-5">
         <form
           className="relative md:col-span-2 lg:col-span-2"
@@ -141,7 +140,6 @@ export default function DocumentsPage() {
         </Select>
       </div>
 
-      {/* Custom date range */}
       <div className="flex flex-wrap items-center gap-2 text-sm">
         <span className="text-muted-foreground">Custom range:</span>
         <Input

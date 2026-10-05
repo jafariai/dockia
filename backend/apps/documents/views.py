@@ -191,7 +191,6 @@ class DocumentViewSet(viewsets.ModelViewSet):
         # so a direct browser navigation can never execute it on the app origin.
         if interactive:
             response["Content-Disposition"] = 'attachment; filename="preview.html"'
-        # Tells the client which sandbox to apply (with vs without allow-scripts).
         response["X-Render-Mode"] = document.render_mode
         return response
 

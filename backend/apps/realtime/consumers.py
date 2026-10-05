@@ -42,7 +42,6 @@ class NotificationConsumer(AsyncWebsocketConsumer):
         for group in getattr(self, "groups_joined", []):
             await self.channel_layer.group_discard(group, self.channel_name)
 
-    # Group message handler (event["type"] == "activity").
     async def activity(self, event):
         await self.send(text_data=json.dumps(event["payload"]))
 

@@ -3,7 +3,6 @@ from django.core.validators import RegexValidator
 from django.db import models
 from django.utils.text import slugify
 
-# Shared 6-digit hex color validator (e.g. #4f46e5) for charts/labels.
 hex_color_validator = RegexValidator(
     r"^#(?:[0-9a-fA-F]{6})$", "Enter a valid hex color, e.g. #4f46e5."
 )
@@ -13,7 +12,6 @@ class Project(models.Model):
     name = models.CharField(max_length=120, unique=True)
     slug = models.SlugField(max_length=140, unique=True, blank=True)
     description = models.TextField(blank=True)
-    # Display color used in dashboard charts and labels.
     color = models.CharField(
         max_length=7, default="#6366f1", validators=[hex_color_validator]
     )

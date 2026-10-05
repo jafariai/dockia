@@ -263,7 +263,6 @@ function ProjectsInner() {
         </div>
       )}
 
-      {/* Create dialog */}
       <Dialog
         open={createOpen}
         onClose={() => setCreateOpen(false)}
@@ -296,7 +295,6 @@ function ProjectsInner() {
         </form>
       </Dialog>
 
-      {/* Color dialog */}
       <Dialog
         open={!!colorFor}
         onClose={() => setColorFor(null)}
@@ -316,7 +314,6 @@ function ProjectsInner() {
         </div>
       </Dialog>
 
-      {/* Links dialog */}
       <Dialog
         open={!!linksProject}
         onClose={() => setLinksForId(null)}
@@ -365,7 +362,6 @@ function ProjectsInner() {
                   onChange={(e) => {
                     const v = e.target.value;
                     setLinkType(v);
-                    // Prefill the label with the service name if still empty.
                     if (!linkLabel) setLinkLabel(linkTypeLabel(v));
                   }}
                 >
@@ -409,7 +405,6 @@ function ProjectsInner() {
         </div>
       </Dialog>
 
-      {/* Members dialog */}
       <Dialog
         open={!!memberFor}
         onClose={() => setMemberFor(null)}

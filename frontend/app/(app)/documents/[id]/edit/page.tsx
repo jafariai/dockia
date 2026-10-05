@@ -31,7 +31,6 @@ export default function DocumentEditPage({ params }: { params: { id: string } })
   // Below lg, the two panels become tabs instead of stacking (mobile-first).
   const [mobileTab, setMobileTab] = useState<"code" | "preview">("code");
 
-  // Seed the editor once the source arrives.
   useEffect(() => {
     if (raw) {
       setValue(raw.html);
@@ -46,7 +45,6 @@ export default function DocumentEditPage({ params }: { params: { id: string } })
     return () => clearTimeout(t);
   }, [value]);
 
-  // Warn before leaving with unsaved edits.
   useEffect(() => {
     const handler = (e: BeforeUnloadEvent) => {
       if (dirty) {

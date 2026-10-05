@@ -4,7 +4,6 @@
 
 [![CI](https://github.com/jafariai/dockia/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/jafariai/dockia/actions/workflows/ci-cd.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![PRs welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
 AI tools have made rich, visual HTML documents cheap to produce: specs, reports,
 architecture write-ups, dashboards, one-off explainers. A team can generate
@@ -37,7 +36,7 @@ project and category, with roles, audit logs, and realtime notifications.
 | **Files** | Arbitrary file storage per project, streamed through nginx with signed, short-lived download links |
 | **Roles** | `admin`, `member`, and read-only `audience` |
 | **API tokens** | Revocable service tokens with read-only scope and optional expiry |
-| **MCP server** | Publish and edit documents straight from an AI assistant — see [mcp-server/](mcp-server/) |
+| **MCP server** | Publish and edit documents straight from an AI assistant |
 | **Realtime** | WebSocket activity feed, nav badges, and web push notifications |
 | **Audit log** | Append-only record of logins, uploads, edits, and admin actions, with CSV export |
 | **PWA** | Installable, mobile-friendly, light and dark themes |
@@ -68,8 +67,7 @@ certificate; that is expected locally. The first boot runs migrations, collects
 static files, and seeds the admin user plus a starter project and
 categories.
 
-To put Dockia on a real server — behind an IP allowlist or a domain with a
-trusted certificate — see [DEPLOY.md](DEPLOY.md).
+To put Dockia on a real server, see [Deployment](#deployment).
 
 ### Local development
 
@@ -95,16 +93,46 @@ work on the app without running the Docker stack.
 
 ## Publishing from an AI assistant
 
-The [MCP server](mcp-server/) turns Dockia into a publishing target for any
-[Model Context Protocol](https://modelcontextprotocol.io) client. Mint a token
-under **Settings → API tokens**, register the server with your client, and ask:
+The MCP server in `mcp-server/` turns Dockia into a publishing target for any
+[Model Context Protocol](https://modelcontextprotocol.io) client. Every call
+runs with the permissions of the token's owner, project scoping included.
+
+1. Mint a token in the web app under **Settings → API tokens**. Tokens can be
+   read-only, given an expiry, and revoked at any time.
+2. Install the dependencies (Python 3.10+):
+   ```bash
+   cd mcp-server
+   python -m venv .venv && source .venv/bin/activate   # Windows: .venv\Scriptsctivate
+   pip install -r requirements.txt
+   ```
+3. Register the server with your MCP client:
+   ```json
+   {
+     "mcpServers": {
+       "dockia": {
+         "command": "/path/to/dockia/mcp-server/.venv/bin/python",
+         "args": ["/path/to/dockia/mcp-server/server.py"],
+         "env": {
+           "DOCKIA_BASE_URL": "https://localhost:8443/api",
+           "DOCKIA_TOKEN": "idp_paste_your_token_here",
+           "DOCKIA_CA_BUNDLE": "/path/to/dockia/nginx/certs/dockia.crt"
+         }
+       }
+     }
+   }
+   ```
+
+Then ask your assistant:
 
 > "Write up the caching design we just discussed as an HTML doc and publish it
 > to the *Infrastructure* project."
 
-The assistant calls `create_document`, Dockia sanitizes and stores it, and your
-teammates get a notification with a link. Tokens inherit their owner's project
-access and can be limited to read-only.
+Tools: `list_documents`, `get_document`, `get_document_html`, `list_projects`,
+`list_categories`, `create_document`, `edit_document`,
+`create_document_from_file`, `update_document_from_file`, `upload_file`.
+
+`DOCKIA_CA_BUNDLE` trusts a self-signed deployment; `DOCKIA_INSECURE=1` skips
+TLS verification entirely and is only for an endpoint you control.
 
 ---
 
@@ -139,8 +167,23 @@ Only nginx publishes a port. The database and Redis sit on an internal Docker
 network, and uploaded files are never served directly — raw HTML only leaves
 the system through the sanitizing preview API.
 
-More detail: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the data model
-and request flows, [docs/SECURITY.md](docs/SECURITY.md) for the security model.
+### Rendering untrusted HTML
+
+Every document passes through three independent layers:
+
+1. **Sanitization on upload** — scripts, event handlers, `javascript:` URLs,
+   iframes, forms, and anything outside a tag / attribute / CSS allowlist are
+   removed before storage.
+2. **Content-Security-Policy** on the preview — no scripts, no external loads.
+3. **Sandboxed iframe** with an opaque origin, so even a sanitizer bypass cannot
+   reach the app, its cookies, or its tokens.
+
+Documents that need their own JavaScript can be switched by an admin to
+*interactive* mode: scripts run, still in an opaque origin, with every network
+egress channel closed by CSP.
+
+Authorization is enforced on the server for every request. Querysets are scoped
+to the caller's projects, so a document outside them returns 404 rather than 403.
 
 ### Repository layout
 
@@ -154,8 +197,7 @@ and request flows, [docs/SECURITY.md](docs/SECURITY.md) for the security model.
 ├── frontend/         Next.js app (app/, components/, lib/)
 ├── mcp-server/       MCP server exposing the document API as tools
 ├── nginx/            reverse-proxy config
-├── scripts/          cert generation, deploy, backup/restore, port allowlist
-└── docs/             architecture, security, project proposal
+└── scripts/          cert generation, deploy, backup/restore, port allowlist
 ```
 
 ---
@@ -182,6 +224,41 @@ Document listing filters are combinable: `search`, `owner`, `category`,
 
 ---
 
+## Deployment
+
+The stack publishes one host port (`HTTPS_PORT`, default 8443); the database and
+Redis are never exposed. On the server:
+
+```bash
+DOCKIA_HOST=<server-ip-or-hostname> ./scripts/gen-selfsigned-cert.sh
+cp .env.example .env      # set the secrets, DJANGO_ALLOWED_HOSTS, FRONTEND_ORIGIN
+docker compose up -d --build
+```
+
+`FRONTEND_ORIGIN` must be the exact origin the browser uses, including the port
+(for example `https://203.0.113.10:8443`). Change the admin password after the
+first login.
+
+- **Restrict access by IP.** Docker bypasses `ufw` for published ports, so the
+  allowlist goes in the `DOCKER-USER` chain:
+  ```bash
+  sudo DOCKIA_ALLOW_IPS="203.0.113.10 198.51.100.0/24" ./scripts/restrict-port.sh
+  ```
+- **Use a domain and a trusted certificate.** Put a reverse proxy with a
+  CA-issued certificate in front of `HTTPS_PORT`, set `DJANGO_ALLOWED_HOSTS` and
+  `FRONTEND_ORIGIN` to the domain, then enable `SECURE_HSTS_SECONDS`.
+- **Back up.** `./scripts/backup.sh` dumps the database and archives uploads
+  into `./backups/`; `./scripts/restore.sh` restores them. Copy backups off the
+  server.
+- **Update.** `bash scripts/deploy.sh` pulls, rebuilds, and restarts. The
+  included GitHub Actions workflow can run it over SSH after the checks pass,
+  once the `DEPLOY_SSH_HOST`, `DEPLOY_SSH_USER`, and `DEPLOY_SSH_KEY` secrets
+  are set; without them the deploy step is skipped.
+- **Storage.** Uploads have no size cap by default, so watch free disk space.
+  Set `STORAGE_BACKEND=s3` and the `AWS_*` variables to store uploads in S3.
+
+---
+
 ## Roadmap
 
 Dockia stores one current revision per document today. The next milestones turn
@@ -197,8 +274,7 @@ it into proper version control for documents:
 - [ ] Per-document share links
 - [ ] Webhooks for CI pipelines that publish generated docs
 
-The reasoning behind this order is in [docs/PROPOSAL.md](docs/PROPOSAL.md). If
-one of these matters to you, open an issue — or pick it up.
+If one of these matters to you, open an issue — or pick it up.
 
 ---
 
@@ -220,11 +296,19 @@ the frontend typecheck and build.
 
 ## Contributing
 
-Contributions are welcome — bug reports, features, docs, and design feedback
-alike. Start with [CONTRIBUTING.md](CONTRIBUTING.md), and please read the
-[Code of Conduct](CODE_OF_CONDUCT.md).
+Bug reports, feature ideas, and pull requests are welcome.
 
-Found a security issue? Please report it privately; see [SECURITY.md](SECURITY.md).
+- For anything larger than a bug fix, open an issue first so the approach can be
+  agreed before you invest the time.
+- Run the checks before opening a pull request: `python manage.py check` and
+  `python smoke_test.py` in `backend/`, `npm run typecheck` and `npm run build`
+  in `frontend/`.
+- Commit migrations together with the model change that needs them.
+- Changes to the sanitizer, the preview CSP, or the iframe sandbox are
+  security-sensitive: explain the threat model and add a smoke-test case.
+
+**Security issues:** please do not open a public issue. Use **Security → Report
+a vulnerability** on the repository to report privately.
 
 ## License
 

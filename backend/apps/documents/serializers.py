@@ -57,7 +57,6 @@ class DocumentWriteSerializer(serializers.ModelSerializer):
         fields = ["id", "title", "description", "category", "project", "tags",
                   "render_mode", "html_file", "html_content"]
 
-    # --- field validation ---------------------------------------------------
     def validate_html_file(self, file):
         from django.conf import settings
 
@@ -123,7 +122,6 @@ class DocumentWriteSerializer(serializers.ModelSerializer):
                                 "interactive (script-executing) documents."}
             )
 
-    # --- persistence --------------------------------------------------------
     def _derive_filename(self, validated) -> str:
         """Reuse the existing stored filename on edit; otherwise slug the title."""
         if self.instance and self.instance.html_file:

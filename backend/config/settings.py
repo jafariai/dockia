@@ -23,9 +23,7 @@ def env_list(key: str, default: str = "") -> list[str]:
     return [item.strip() for item in raw.split(",") if item.strip()]
 
 
-# ---------------------------------------------------------------------------
 # Core
-# ---------------------------------------------------------------------------
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "insecure-dev-key-change-me")
 DEBUG = env_bool("DJANGO_DEBUG", "0")
 ALLOWED_HOSTS = env_list("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1")
@@ -74,7 +72,6 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    # Stamps request.user onto the thread for audit logging.
     "apps.audit.middleware.AuditContextMiddleware",
 ]
 
@@ -127,9 +124,7 @@ TEMPLATES = [
     },
 ]
 
-# ---------------------------------------------------------------------------
 # Database
-# ---------------------------------------------------------------------------
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
@@ -153,7 +148,6 @@ AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
 ]
-# Strong, slow password hashing.
 PASSWORD_HASHERS = [
     "django.contrib.auth.hashers.Argon2PasswordHasher",
     "django.contrib.auth.hashers.PBKDF2PasswordHasher",
@@ -166,9 +160,7 @@ TIME_ZONE = "UTC"
 USE_I18N = True
 USE_TZ = True
 
-# ---------------------------------------------------------------------------
 # Static & media / storage
-# ---------------------------------------------------------------------------
 STATIC_URL = "/static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
 STORAGES = {
@@ -205,9 +197,7 @@ if os.getenv("STORAGE_BACKEND", "local") == "s3":
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-# ---------------------------------------------------------------------------
 # DRF + JWT
-# ---------------------------------------------------------------------------
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
         # Service tokens (Authorization: Token …) for the MCP server / scripts,
@@ -215,7 +205,6 @@ REST_FRAMEWORK = {
         "apps.accounts.authentication.ApiTokenAuthentication",
         "rest_framework_simplejwt.authentication.JWTAuthentication",
     ),
-    # Authentication required everywhere unless a view explicitly opts out.
     "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
     # Derive throttle identity from the real client IP (the trusted proxy-appended
     # X-Forwarded-For hop), so a forged header can't mint fresh throttle buckets.
@@ -257,16 +246,12 @@ SIMPLE_JWT = {
     "TOKEN_OBTAIN_SERIALIZER": "apps.accounts.serializers.TokenObtainPairSerializer",
 }
 
-# ---------------------------------------------------------------------------
 # CORS / CSRF
-# ---------------------------------------------------------------------------
 CORS_ALLOWED_ORIGINS = FRONTEND_ORIGINS
 CORS_ALLOW_CREDENTIALS = True
 CSRF_TRUSTED_ORIGINS = FRONTEND_ORIGINS
 
-# ---------------------------------------------------------------------------
 # Security headers / hardening
-# ---------------------------------------------------------------------------
 SECURE_CONTENT_TYPE_NOSNIFF = True
 SECURE_REFERRER_POLICY = "strict-origin-when-cross-origin"
 X_FRAME_OPTIONS = "SAMEORIGIN"

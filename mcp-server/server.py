@@ -87,7 +87,6 @@ def _raise_for_status(resp: httpx.Response) -> None:
     raise RuntimeError(f"API {resp.status_code}: {detail}")
 
 
-# --- Read tools ------------------------------------------------------------
 @mcp.tool()
 def list_documents(search: str = "", project: int | None = None,
                    category: int | None = None, page: int = 1) -> dict[str, Any]:
@@ -173,7 +172,6 @@ def list_categories() -> list[dict[str, Any]]:
     return [{"id": c_["id"], "name": c_["name"]} for c_ in r.json().get("results", [])]
 
 
-# --- Write tools -----------------------------------------------------------
 @mcp.tool()
 def create_document(title: str, html: str, project_id: int, category_id: int,
                     description: str = "", render_mode: str = "sanitized",
@@ -222,7 +220,6 @@ def edit_document(document_id: int, html: str | None = None,
     return r.json()
 
 
-# --- File-upload tools (sidestep the inline-string limit) -------------------
 @mcp.tool()
 def create_document_from_file(file_path: str, title: str, project_id: int,
                               category_id: int, description: str = "",

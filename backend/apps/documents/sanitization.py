@@ -23,7 +23,6 @@ _DANGEROUS_BLOCKS = re.compile(
     r"<\s*/\s*\1\s*>",
     re.IGNORECASE | re.DOTALL,
 )
-# Self-closing / unclosed variants of the same.
 _DANGEROUS_VOID = re.compile(
     r"<\s*/?\s*(script|style|iframe|object|embed|form)\b[^>]*>", re.IGNORECASE
 )
@@ -53,7 +52,6 @@ ALLOWED_ATTRIBUTES = {
     "time": ["datetime"],
 }
 
-# Only safe URL schemes. Notably excludes javascript: and data: for hrefs.
 ALLOWED_PROTOCOLS = ["http", "https", "mailto"]
 
 # CSS properties permitted inside style="" — layout/typography only.
@@ -88,6 +86,5 @@ def sanitize_html(raw_html: str) -> str:
         strip=True,           # drop disallowed tags instead of escaping them
         strip_comments=True,
     )
-    # Force any anchor that opens a new tab to drop the opener reference.
     cleaned = cleaned.replace('target="_blank"', 'target="_blank" rel="noopener noreferrer"')
     return cleaned

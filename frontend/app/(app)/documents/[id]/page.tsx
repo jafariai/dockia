@@ -236,7 +236,6 @@ export default function DocumentDetailPage({
         </div>
       </div>
 
-      {/* Update document from a new file (drag & drop) */}
       <Dialog
         open={updateOpen}
         onClose={() => {

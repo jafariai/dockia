@@ -33,7 +33,6 @@ def check(label, cond):
         print(f"  FAIL  {label}")
 
 
-# --- fixtures --------------------------------------------------------------
 admin = User.objects.create_superuser("admin@team.internal", "ChangeMe123!",
                                       first_name="A", last_name="Admin")
 member = User.objects.create_user("member@team.internal", "Member123!pass",
@@ -100,7 +99,6 @@ r = api.post("/api/documents", {
 }, format="multipart")
 check("member cannot upload to project B (400)", r.status_code == 400)
 
-# Admin puts a doc in project B; member must not see it.
 admin_api = APIClient()
 at = login("admin@team.internal", "ChangeMe123!").data["access"]
 admin_api.credentials(HTTP_AUTHORIZATION=f"Bearer {at}")

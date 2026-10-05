@@ -41,7 +41,6 @@ function Thumbnail({ id, interactive }: { id: number; interactive: boolean }) {
   // Only sanitized (script-free) docs get a live, cached preview.
   const wantsPreview = !interactive;
 
-  // Render the preview only once the card scrolls near the viewport.
   useEffect(() => {
     if (!wantsPreview) return;
     const el = ref.current;

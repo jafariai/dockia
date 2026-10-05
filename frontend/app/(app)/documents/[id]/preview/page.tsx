@@ -34,7 +34,6 @@ export default function PreviewPage({
           : "h-[calc(100vh-7rem)]"
       )}
     >
-      {/* Toolbar */}
       <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-3">
           <Link
@@ -75,7 +74,6 @@ export default function PreviewPage({
         </div>
       </div>
 
-      {/* Viewer + metadata */}
       <div className="flex min-h-0 flex-1 gap-3">
         <div className="min-h-0 flex-1 overflow-hidden rounded-xl border border-border">
           <HtmlPreview

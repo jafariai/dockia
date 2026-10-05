@@ -3,7 +3,6 @@ from django.db import models
 
 
 def file_upload_path(instance, filename):
-    # Group stored blobs by project for a tidy local/S3 layout.
     return f"files/project_{instance.project_id}/{filename}"
 
 

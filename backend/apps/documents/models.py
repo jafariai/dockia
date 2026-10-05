@@ -3,7 +3,6 @@ from django.db import models
 
 
 def html_upload_path(instance, filename):
-    # Group originals by project for tidy local/S3 layout.
     return f"documents/project_{instance.project_id}/{filename}"
 
 
@@ -23,7 +22,6 @@ class Document(models.Model):
 
     # Original upload (kept for provenance / re-export). Never served raw.
     html_file = models.FileField(upload_to=html_upload_path)
-    # Server-sanitized HTML actually rendered in the isolated preview.
     sanitized_html = models.TextField(blank=True)
     file_size = models.PositiveIntegerField(default=0)
 

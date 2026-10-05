@@ -9,14 +9,12 @@ const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "/api";
 
 export const api = axios.create({ baseURL: BASE_URL });
 
-// Attach the in-memory access token to every request.
 api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   const token = useAuthStore.getState().accessToken;
   if (token) config.headers.Authorization = `Bearer ${token}`;
   return config;
 });
 
-// --- Transparent refresh on 401 -------------------------------------------
 // A single in-flight refresh is shared by all queued requests so we never
 // hammer /auth/refresh. On failure we clear the session (forces re-login).
 let refreshing: Promise<string | null> | null = null;
